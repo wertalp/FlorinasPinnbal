@@ -68,9 +68,7 @@ public class MainActivity extends AppCompatActivity {
         // Set No Title
        /// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         bindUI();
-        tvX.setText(String.valueOf("0,00"));
-        tvY.setText(String.valueOf("0.00"));
-        tvZ.setText(String.valueOf("0.00"));
+
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -105,9 +103,7 @@ public class MainActivity extends AppCompatActivity {
     private void bindUI(){
       // ball = findViewById(R.id.ball) ;
        layoutGame = (ConstraintLayout) findViewById(R.id.layoutGame);
-       tvX    = (TextView) findViewById(R.id.tvZ);
-       tvY    = (TextView) findViewById(R.id.tvX);
-       tvZ    = (TextView) findViewById(R.id.tvX);
+
 
         bounceView = (ch.wertal.solutions.BounceView)   findViewById(R.id.bounceView);
         paddle = bounceView.getPaddle();
