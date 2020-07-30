@@ -12,6 +12,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
@@ -23,7 +24,7 @@ import android.widget.Toast;
 
 import java.util.Timer;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Runnable{
 
     private static final String TAG = "main" ;
     ImageView ball ;
@@ -49,8 +50,11 @@ public class MainActivity extends AppCompatActivity {
     long lastUpdate ;
     long periode = (long) 50000000F;
     boolean mInitiialize ;
-
+    int  bgcounter =0 ;
+    BackgroundFactory backgroundFactory ;
     Context appcontext = null;
+    Thread bgthread ;
+    private Handler handler;
 
 
     @Override
@@ -61,24 +65,39 @@ public class MainActivity extends AppCompatActivity {
         mInitiialize = true ;
         appcontext = getApplicationContext();
 
-        // Set fullscreen
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        // Set No Title
-       /// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         bindUI();
-
-
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         bounceView.setAppcontext(appcontext);
+        runThread();
     }
 
-    public void startGame(View view){
-        Toast.makeText(this,"lets go DUDE",Toast.LENGTH_SHORT).show();
+    private void runThread() {
+        bgthread = new Thread(this);
+        bgthread.start();
+    }
+
+    public void startGame(){
+        if (bgcounter % 2 == 1)  {
+           // Thread.sleep(5000);
+            layoutGame.setBackgroundResource(R.drawable.hillsbg);
+        }
+        else
+        {
+            layoutGame.setBackgroundResource(R.drawable.metal);
+        }
+       // Toast.makeText(this,"lets go DUDE",Toast.LENGTH_SHORT).show();
+        //layoutGame.setBackgroundResource(R.drawable.hillsbg);
         bounceView.setRunning(true);
         bounceView.invalidate();
+        bgcounter++ ;
+    }
+
+    private void changeBackground(View view){
+
     }
 
     @Override
@@ -108,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
         bounceView = (ch.wertal.solutions.BounceView)   findViewById(R.id.bounceView);
         paddle = bounceView.getPaddle();
         mInitiialize = false ;
-
         bounceView.setOnTouchListener(new OnSwipeTouchListener(this) {
 
             public boolean onSwipeTop() {
@@ -133,7 +151,8 @@ public class MainActivity extends AppCompatActivity {
             }});
    }
 
-
-
-
+    @Override
+    public void run() {
+            startGame();
+    }
 }

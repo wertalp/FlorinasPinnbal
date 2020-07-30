@@ -8,10 +8,10 @@ import android.graphics.RectF;
 
 public class Paddle {
     public int[] direction = new int[]{1,1}; //direction modifier (-1,1)
-    public float x,y,x1,y1;
+    public int x,y,x1,y1;
     public int speed = 10;
     public Paint paint;
-    public RectF rect;
+    public Rect rect;
     public int initalX, initialY ;
     boolean movingL, movingR = false ;
     int cornerRadius = 50;
@@ -43,17 +43,17 @@ public class Paddle {
         this.paint.setColor(color);
         this.fillPaint = new Paint();
         this.strokePaint = new Paint();
-        this.rect = new RectF(x,y,x1,y1);
+        this.rect = new Rect(x,y,x1,y1);
         this.initPaints();
     }
 
-    public void moveleft(float x) throws InterruptedException {
+    public void moveleft(int x) throws InterruptedException {
           if (this.x < 40){
               return;
           }
             this.x = this.x - x*speed;
             this.x1 = this.x1 - x*speed;
-            this.rect = new RectF(this.x , 1900, x1 , 1870);
+            this.rect = new Rect(this.x , 1800, x1 , 1770);
 
     }
 
@@ -61,9 +61,9 @@ public class Paddle {
         if (this.x > 750){
             return;
         }
-           this.x = this.x +Math.abs(x*speed) ;
-           this.x1 = this.x1 + Math.abs(x*speed);
-           this.rect = new RectF(this.x,1900,x1,1870);
+           this.x = (int) (this.x +Math.abs(x*speed));
+           this.x1 = (int) (this.x1 + Math.abs(x*speed));
+           this.rect = new Rect(this.x,1800,x1,1770);
        }
 
     public void moveUp(float x) throws InterruptedException {
@@ -72,14 +72,13 @@ public class Paddle {
         }
         this.y = this.y +speed ;
         this.y1 = this.y1 +speed ;
-        this.rect = new RectF(this.x,this.y,x1,this.y1+speed);
+        this.rect = new Rect(this.x,this.y,x1,this.y1+speed);
     }
 
     public void draw(Canvas canvas){
         canvas.drawRect(this.rect,this.paint);
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, fillPaint);    // fill
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, strokePaint);
-
+        canvas.drawRoundRect(new RectF(rect), cornerRadius, cornerRadius, fillPaint);    // fill
+        canvas.drawRoundRect(new RectF(rect), cornerRadius, cornerRadius, strokePaint);
     }
 
     void initPaints() {
@@ -93,5 +92,10 @@ public class Paddle {
         strokePaint.setColor(Color.BLACK);
         strokePaint.setStrokeWidth(10);
     }
+
+   public Rect bounds() {
+        return  rect;
+   }
+
 
 }

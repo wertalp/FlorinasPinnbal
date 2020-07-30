@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PathDashPathEffect;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -25,6 +24,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ch.wertal.solutions.GameConfig.ANZ_COLS;
+import static ch.wertal.solutions.GameConfig.ANZ_ROW;
+import static ch.wertal.solutions.GameConfig.loadBees;
+import static ch.wertal.solutions.util.Actions.detectCollisions ;
+
 public class BounceView extends View implements SensorEventListener {
 
     int startPosX, startPosY ;
@@ -40,10 +44,17 @@ public class BounceView extends View implements SensorEventListener {
     float mlastY;
     float mlastZ;
     private final float NOISE = (float) 2.0 ;
+    Bee[][] bees = new Bee[ANZ_ROW][ANZ_COLS] ;
+    String TAG = "MainBounceView";
+    Ball currBall ;
+    boolean isCollision = false ;
+
 
     TextView tvX ;
     TextView tvY ;
     TextView tvZ ;
+
+    ConstraintLayout layoutGame;
 
     public boolean isRunning() {
         return running;
@@ -59,13 +70,15 @@ public class BounceView extends View implements SensorEventListener {
 
     public BounceView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        //paddle = new Paddle(startPosX/2,startPosY-320,startPosX/2+300,startPosY-300,Color.YELLOW);
-        paddle = new Paddle(500,1600,800,1620,Color.YELLOW);
-        mp  = MediaPlayer.create(context, R.raw.bounce);
+        GameConfig.setAppcontext(context);
+
+        paddle     = new Paddle(500,1600,800,1620,Color.YELLOW);
+        mp         = MediaPlayer.create(context, R.raw.bounce);
         appcontext = context;
         appcontext.getApplicationContext();
         createBalls();
-        // ball = findViewById(R.id.ball) ;
+        bees = loadBees();
+       // layoutGame.setBackgroundResource(R.drawable.hillsbg);
 
     }
 
@@ -90,11 +103,12 @@ public class BounceView extends View implements SensorEventListener {
         super.onDraw(canvas);
 
         canvas.drawText("Punkte:"+ Ball.getScore() , 50, 400, getTextPaint());
-        canvas.drawText("X:"+ mlastX , 700, 600, getTextPaint());
-        canvas.drawText("Y:"+ mlastY , 700, 700, getTextPaint());
-        canvas.drawText("Z:"+ mlastZ , 700, 800, getTextPaint());
+        canvas.drawText("X:"+ mlastX , 700, 1600, getTextPaint());
+        canvas.drawText("Y:"+ mlastY , 700, 1700, getTextPaint());
+        canvas.drawText("Z:"+ mlastZ , 700, 1800, getTextPaint());
 
         canvas.drawText("Wertal Software Solution @2020:"+ Ball.getScore() , 40, 1800, getsmallTextPaint());
+        canvas.drawText("Collision now:"+isCollision,40,1900, getsmallTextPaint());
 
         paddle.draw(canvas);
 
@@ -104,27 +118,33 @@ public class BounceView extends View implements SensorEventListener {
                 // canvas.drawRect(100,120,220,1100,paddle.paint);
                 initial=false;
             }
+
+
+        for(int row = 0 ; row < bees.length; row++){
+            for (int col =0; col < bees[row].length; col++){
+                Bee beeTmp = bees[row][col] ;
+                beeTmp.moveDown(5);
+                canvas.drawBitmap(beeTmp.getBmp(),beeTmp.getPosX(), beeTmp.getPosY(),null) ;
+            }
+        }
+
         invalidate();
 }
 
     public void createBalls(){
      //   balls.add(new Ball(200,30,140,Color.GREEN));
-        balls.add(new Ball(450,230,60,Color.RED,mp));
-
+          balls.add(new Ball(45,700,60,Color.RED,mp));
+          currBall = balls.get(0);
     };
 
     public Paddle getPaddle(){
         return paddle;
     }
 
-    public void movepaddle() throws InterruptedException {
-        paddle.moveleft(2);
-    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
-        //paddle.move();
         invalidate();
         return false;
     }
@@ -204,21 +224,32 @@ public class BounceView extends View implements SensorEventListener {
 
                 if (xSensor > 0) {
                     try {
-                    paddle.moveleft(mlastX);
+                    paddle.moveleft((int) mlastX);
+                     if ( detectCollisions(paddle,currBall))
+                     {
+                         isCollision = true ;
+                         currBall.changedirection();
+
+                     }
+
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 }
             if (xSensor < 0) {
                 try {
-                    paddle.moveRight(mlastX);
+                    paddle.moveRight((int) mlastX);
+
+                    if ( detectCollisions(paddle,currBall))
+                    {
+                        isCollision = true ;
+                        currBall.changedirection();
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 }
-
         }
-
     }
 
     @Override

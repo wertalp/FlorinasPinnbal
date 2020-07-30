@@ -6,12 +6,15 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.MediaPlayer;
 
+import androidx.constraintlayout.solver.widgets.Rectangle;
+
 public class Ball{
     public int[] direction = new int[]{1,1}; //direction modifier (-1,1)
     public int x,y,size;
     public int speed = 10;
     public Paint paint;
     public RectF oval;
+    private Rect bounds ;
     public static int score ;
     MediaPlayer mp ;
 
@@ -22,6 +25,12 @@ public class Ball{
         this.paint = new Paint();
         this.paint.setColor(color);
         this.mp = mp ;
+        this.bounds = new Rect(x,y,x+40,y+40);
+    }
+
+
+    public Rect bounds(){
+        return this.bounds ;
     }
 
     public void move(Canvas canvas) {
@@ -30,23 +39,25 @@ public class Ball{
         this.oval = new RectF(x-size/2,y-size/2,x+size/2,y+size/2);
 
         //Do we need to bounce next time?
-        Rect bounds = new Rect();
         this.oval.roundOut(bounds); ///store our int bounds
 
         //This is what you're looking for ▼
         if(!canvas.getClipBounds().contains(bounds)){
             if(this.x-size<0 || this.x+size > canvas.getWidth()){
-                score = score+1 ;
                 mp.start();
                 direction[0] = direction[0]*-1;
             }
             if(this.y-size<0 || this.y+size > canvas.getHeight()){
                 direction[1] = direction[1]*-1;
                 mp.start();
-                score = score+1 ;
             }
         }
 
+    }
+
+    public void changedirection(){
+        direction[1] = direction[1]*-1;
+        score++;
     }
 
     public static int getScore() {
